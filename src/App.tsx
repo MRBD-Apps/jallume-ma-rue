@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { DisplayRoot, Focusable } from 'mrbd-ui-kit';
+import { DisplayRoot, Button } from 'mrbd-ui-kit';
+import { Lightbulb, Map as MapIcon, Settings as SettingsIcon } from 'lucide-react';
 
 import { useUserId } from './hooks/useUserId';
 import { useGeolocation } from './hooks/useGeolocation';
@@ -11,6 +12,12 @@ import { MapScreen } from './screens/MapScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 
 type Screen = 'main' | 'map' | 'settings';
+
+const NAV = [
+  { id: 'main', label: 'Accueil', icon: Lightbulb },
+  { id: 'map', label: 'Carte', icon: MapIcon },
+  { id: 'settings', label: 'Réglages', icon: SettingsIcon },
+] as const;
 
 function App() {
   const [screen, setScreen] = useState<Screen>('main');
@@ -24,23 +31,21 @@ function App() {
     demoMode,
   });
 
-  void geoError; // available for future error display
+  void geoError; // disponible pour un affichage d'erreur futur
 
   return (
     <DisplayRoot>
       <div
-        className="flex flex-col bg-black text-white"
+        className="flex flex-col bg-black text-mrbd-text"
         style={{ width: '100%', height: '100%' }}
       >
-        {/* Content area */}
+        {/* Zone de contenu */}
         <div className="flex-1 overflow-hidden">
           {screen === 'main' && (
             <div className="h-full overflow-y-auto">
               <MainScreen
                 status={status}
                 config={config}
-                coords={coords}
-                userId={userId}
                 lighting={lighting}
                 timeLeft={timeLeft}
                 demoMode={demoMode}
@@ -49,12 +54,7 @@ function App() {
             </div>
           )}
           {screen === 'map' && (
-            <MapScreen
-              coords={coords}
-              accuracy={accuracy}
-              config={config}
-              dark={dark}
-            />
+            <MapScreen coords={coords} accuracy={accuracy} config={config} dark={dark} />
           )}
           {screen === 'settings' && (
             <div className="h-full overflow-y-auto">
@@ -68,48 +68,20 @@ function App() {
           )}
         </div>
 
-        {/* Bottom navigation bar */}
-        <nav
-          className="flex shrink-0 items-center justify-around border-t border-white/15 bg-black/90 py-2"
-        >
-          <Focusable id="nav-main" onSelect={() => setScreen('main')}>
-            <button
-              type="button"
-              onClick={() => setScreen('main')}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 text-xs font-semibold transition-colors ${
-                screen === 'main' ? 'text-white' : 'text-white/50'
-              }`}
+        {/* Barre de navigation (composants du kit) */}
+        <nav className="flex shrink-0 items-center justify-around gap-2 border-t border-white/10 px-2 py-2">
+          {NAV.map((item) => (
+            <Button
+              key={item.id}
+              id={`nav-${item.id}`}
+              icon={item.icon}
+              variant={screen === item.id ? 'secondary' : 'ghost'}
+              autoFocus={false}
+              onClick={() => setScreen(item.id)}
             >
-              <span className="text-lg leading-none">💡</span>
-              Accueil
-            </button>
-          </Focusable>
-
-          <Focusable id="nav-map" onSelect={() => setScreen('map')}>
-            <button
-              type="button"
-              onClick={() => setScreen('map')}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 text-xs font-semibold transition-colors ${
-                screen === 'map' ? 'text-white' : 'text-white/50'
-              }`}
-            >
-              <span className="text-lg leading-none">🗺</span>
-              Carte
-            </button>
-          </Focusable>
-
-          <Focusable id="nav-settings" onSelect={() => setScreen('settings')}>
-            <button
-              type="button"
-              onClick={() => setScreen('settings')}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 text-xs font-semibold transition-colors ${
-                screen === 'settings' ? 'text-white' : 'text-white/50'
-              }`}
-            >
-              <span className="text-lg leading-none">⚙️</span>
-              Réglages
-            </button>
-          </Focusable>
+              {item.label}
+            </Button>
+          ))}
         </nav>
       </div>
     </DisplayRoot>

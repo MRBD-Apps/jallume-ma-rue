@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 @import 'mrbd-ui-kit/css';
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700&display=swap');
 
-:root { color-scheme: dark; }
-html, body, #root { margin: 0; height: 100%; background: #000; }
+@theme {
+  --font-sans: 'Nunito', 'Noto Sans', sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  /* Accent chaud "éclairage" : pilote boutons, focus ring et glows du kit */
+  --color-mrbd-accent: #fbbf24; /* amber-400 */
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: #000;
+}

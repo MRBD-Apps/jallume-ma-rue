@@ -9,7 +9,8 @@ import {
   useMap,
 } from 'react-leaflet';
 import type { PathOptions } from 'leaflet';
-import { Focusable } from 'mrbd-ui-kit';
+import { Button } from 'mrbd-ui-kit';
+import { Plus, Minus, LocateFixed } from 'lucide-react';
 
 import { CONFIG } from '../config';
 import type { JallumeConfig, LatLng } from '../api/types';
@@ -64,45 +65,22 @@ function MapControls({ coords }: MapControlsProps) {
       style={{ zIndex: 1000 }}
       className="absolute right-3 top-3 flex flex-col gap-2"
     >
-      <Focusable id="zoom-in" onSelect={() => map.zoomIn()}>
-        <button
-          type="button"
-          onClick={() => map.zoomIn()}
-          aria-label="Zoom avant"
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/70 text-xl font-bold text-white shadow-md backdrop-blur-sm"
-        >
-          +
-        </button>
-      </Focusable>
-
-      <Focusable id="zoom-out" onSelect={() => map.zoomOut()}>
-        <button
-          type="button"
-          onClick={() => map.zoomOut()}
-          aria-label="Zoom arrière"
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/70 text-xl font-bold text-white shadow-md backdrop-blur-sm"
-        >
-          −
-        </button>
-      </Focusable>
-
-      <Focusable
+      <Button id="zoom-in" variant="secondary" size="sm" onClick={() => map.zoomIn()}>
+        <Plus className="size-5" aria-label="Zoom avant" />
+      </Button>
+      <Button id="zoom-out" variant="secondary" size="sm" onClick={() => map.zoomOut()}>
+        <Minus className="size-5" aria-label="Zoom arrière" />
+      </Button>
+      <Button
         id="recenter"
-        onSelect={() => {
+        variant="secondary"
+        size="sm"
+        onClick={() => {
           if (coords) map.setView([coords.lat, coords.lng], 18);
         }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            if (coords) map.setView([coords.lat, coords.lng], 18);
-          }}
-          aria-label="Recentrer"
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/70 text-xl font-bold text-white shadow-md backdrop-blur-sm"
-        >
-          ◎
-        </button>
-      </Focusable>
+        <LocateFixed className="size-5" aria-label="Recentrer" />
+      </Button>
     </div>
   );
 }

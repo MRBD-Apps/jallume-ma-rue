@@ -31,12 +31,3 @@ export async function lightRequest(lat: number, lng: number, token: string): Pro
   });
   if (!resp.ok) throw new Error(`lightRequest error (${resp.status})`);
 }
-
-export async function placeRequest(userId: string, lat: number, lng: number): Promise<void> {
-  const resp = await fetch(`${CONFIG.API_BASE_URL}/App/PlaceRequest`, {
-    method: 'POST',
-    headers: JSON_HEADERS,
-    body: JSON.stringify({ idUser: userId, latitude: lat, longitude: lng }),
-  });
-  if (!resp.ok) throw new Error(`placeRequest error (${resp.status})`);
-}

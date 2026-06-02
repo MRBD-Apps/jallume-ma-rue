@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Text } from 'mrbd-ui-kit';
 import { BulbButton } from '../components/BulbButton';
 import { CityBanner } from '../components/CityBanner';
 import { StatusHeader } from '../components/StatusHeader';
 import { ZoneStatusCard } from '../components/ZoneStatusCard';
-import { placeRequest } from '../api/client';
-import type { JallumeConfig, LatLng } from '../api/types';
+import type { JallumeConfig } from '../api/types';
 import type { Status } from '../state/machine';
 
 const STATUS_LABEL: Record<Status['kind'], string> = {
@@ -20,8 +20,6 @@ const CONFIRM_DELAY_MS = 4000;
 interface Props {
   status: Status;
   config: JallumeConfig | null;
-  coords: LatLng | null;
-  userId: string;
   lighting: boolean;
   timeLeft: number;
   demoMode: boolean;
@@ -31,18 +29,15 @@ interface Props {
 export function MainScreen({
   status,
   config,
-  coords,
-  userId,
   lighting,
   timeLeft,
   demoMode,
   onLightUp,
 }: Props) {
   const [confirmPending, setConfirmPending] = useState(false);
-  const [placeSent, setPlaceSent] = useState(false);
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clean up timer on unmount
+  // Nettoyage du timer au démontage
   useEffect(() => {
     return () => {
       if (confirmTimer.current) clearTimeout(confirmTimer.current);
@@ -53,7 +48,7 @@ export function MainScreen({
     if (status.kind !== 'inActiveZone') return;
 
     if (!demoMode && !confirmPending) {
-      // First press in real mode: request confirmation
+      // Premier appui en mode réel : on demande confirmation
       setConfirmPending(true);
       confirmTimer.current = setTimeout(() => {
         setConfirmPending(false);
@@ -61,7 +56,7 @@ export function MainScreen({
       return;
     }
 
-    // Second press (or demo mode): light up
+    // Deuxième appui (ou mode démo) : on allume
     if (confirmTimer.current) {
       clearTimeout(confirmTimer.current);
       confirmTimer.current = null;
@@ -69,12 +64,6 @@ export function MainScreen({
     setConfirmPending(false);
     onLightUp();
   }, [status.kind, demoMode, confirmPending, onLightUp]);
-
-  const handleRequestCity = useCallback(() => {
-    if (placeSent || !coords) return;
-    placeRequest(userId, coords.lat, coords.lng).catch(() => {});
-    setPlaceSent(true);
-  }, [placeSent, coords, userId]);
 
   return (
     <div className="flex flex-col gap-3 pb-4">
@@ -95,14 +84,11 @@ export function MainScreen({
       </div>
 
       {confirmPending ? (
-        <p className="text-center text-sm font-semibold text-amber-300">
+        <Text weight="semibold" className="block text-center text-mrbd-accent">
           Appuyez à nouveau pour allumer réellement
-        </p>
+        </Text>
       ) : (
-        <ZoneStatusCard
-          kind={status.kind}
-          onRequestCity={placeSent ? undefined : handleRequestCity}
-        />
+        <ZoneStatusCard kind={status.kind} />
       )}
     </div>
   );

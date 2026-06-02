@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getConfig, authenticate, lightRequest, placeRequest } from './client';
+import { getConfig, authenticate, lightRequest } from './client';
 
 function mockFetch(status: number, body: unknown) {
   return vi.fn().mockResolvedValue({
@@ -62,20 +62,5 @@ describe('lightRequest', () => {
     const f = mockFetch(401, {});
     vi.stubGlobal('fetch', f);
     await expect(lightRequest(1, 2, 't')).rejects.toThrow('401');
-  });
-});
-
-describe('placeRequest', () => {
-  it('POST /App/PlaceRequest', async () => {
-    const f = mockFetch(200, {});
-    vi.stubGlobal('fetch', f);
-    await placeRequest('user-1', 49.3, 1.15);
-    expect(f).toHaveBeenCalledWith(
-      'https://api.jallume.fr/App/PlaceRequest',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ idUser: 'user-1', latitude: 49.3, longitude: 1.15 }),
-      }),
-    );
   });
 });
