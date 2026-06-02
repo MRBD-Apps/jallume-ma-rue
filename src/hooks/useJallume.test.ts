@@ -47,4 +47,15 @@ describe('useJallume', () => {
     expect(client.lightRequest).toHaveBeenCalled();
     expect(result.current.lighting).toBe(true);
   });
+
+  it('hors mode démo, si lightRequest échoue: lighting reste false et error est renseigné', async () => {
+    vi.spyOn(client, 'lightRequest').mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() =>
+      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1', demoMode: false }),
+    );
+    await waitFor(() => expect(result.current.status.kind).toBe('inActiveZone'));
+    await act(async () => { await result.current.lightUp(); });
+    expect(result.current.lighting).toBe(false);
+    expect(result.current.error).toBeTruthy();
+  });
 });

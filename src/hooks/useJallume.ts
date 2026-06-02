@@ -15,6 +15,7 @@ interface UseJallume {
   status: Status;
   lighting: boolean;
   timeLeft: number;
+  error: string | null;
   lightUp: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
   const [config, setConfig] = useState<JallumeConfig | null>(null);
   const [lighting, setLighting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const lastFetch = useRef<LatLng | null>(null);
   const tokenRef = useRef<{ token: string; expiresAt: Date } | null>(null);
@@ -63,7 +65,13 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
 
   const lightUp = useCallback(async () => {
     if (!coords || lighting) return;
-    await sendLight();
+    try {
+      await sendLight();
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      return;
+    }
 
     const total = (config?.tempsMinuterie ?? CONFIG.DEFAULT_TIMER) - CONFIG.TIMER_VISUAL_OFFSET;
     setLighting(true);
@@ -93,5 +101,5 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
     if (timerInterval.current) clearInterval(timerInterval.current);
   }, []);
 
-  return { config, status, lighting, timeLeft, lightUp };
+  return { config, status, lighting, timeLeft, error, lightUp };
 }
