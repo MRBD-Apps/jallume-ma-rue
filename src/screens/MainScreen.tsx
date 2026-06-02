@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Text } from 'mrbd-ui-kit';
+import { useCallback } from 'react';
 import { BulbButton } from '../components/BulbButton';
 import { CityBanner } from '../components/CityBanner';
 import { StatusHeader } from '../components/StatusHeader';
@@ -15,55 +14,19 @@ const STATUS_LABEL: Record<Status['kind'], string> = {
   inActiveZone: 'Prêt',
 };
 
-const CONFIRM_DELAY_MS = 4000;
-
 interface Props {
   status: Status;
   config: JallumeConfig | null;
   lighting: boolean;
   timeLeft: number;
-  demoMode: boolean;
   onLightUp: () => void;
 }
 
-export function MainScreen({
-  status,
-  config,
-  lighting,
-  timeLeft,
-  demoMode,
-  onLightUp,
-}: Props) {
-  const [confirmPending, setConfirmPending] = useState(false);
-  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Nettoyage du timer au démontage
-  useEffect(() => {
-    return () => {
-      if (confirmTimer.current) clearTimeout(confirmTimer.current);
-    };
-  }, []);
-
+export function MainScreen({ status, config, lighting, timeLeft, onLightUp }: Props) {
   const handleActivate = useCallback(() => {
     if (status.kind !== 'inActiveZone') return;
-
-    if (!demoMode && !confirmPending) {
-      // Premier appui en mode réel : on demande confirmation
-      setConfirmPending(true);
-      confirmTimer.current = setTimeout(() => {
-        setConfirmPending(false);
-      }, CONFIRM_DELAY_MS);
-      return;
-    }
-
-    // Deuxième appui (ou mode démo) : on allume
-    if (confirmTimer.current) {
-      clearTimeout(confirmTimer.current);
-      confirmTimer.current = null;
-    }
-    setConfirmPending(false);
     onLightUp();
-  }, [status.kind, demoMode, confirmPending, onLightUp]);
+  }, [status.kind, onLightUp]);
 
   return (
     <div className="flex flex-col gap-3 pb-4">
@@ -83,13 +46,7 @@ export function MainScreen({
         />
       </div>
 
-      {confirmPending ? (
-        <Text weight="semibold" className="block text-center text-mrbd-accent">
-          Appuyez à nouveau pour allumer réellement
-        </Text>
-      ) : (
-        <ZoneStatusCard kind={status.kind} />
-      )}
+      <ZoneStatusCard kind={status.kind} />
     </div>
   );
 }

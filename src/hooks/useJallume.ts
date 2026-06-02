@@ -7,7 +7,6 @@ import { computeStatus, type Status } from '../state/machine';
 interface Params {
   coords: LatLng | null;
   userId: string;
-  demoMode: boolean;
 }
 
 interface UseJallume {
@@ -19,7 +18,7 @@ interface UseJallume {
   lightUp: () => Promise<void>;
 }
 
-export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
+export function useJallume({ coords, userId }: Params): UseJallume {
   const [config, setConfig] = useState<JallumeConfig | null>(null);
   const [lighting, setLighting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -42,7 +41,7 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
     getConfig(coords.lat, coords.lng)
       .then(setConfig)
       .catch(() => setConfig({ ville: {} }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coords]);
 
   // Recalcul du statut à chaque changement de position/config
@@ -58,10 +57,9 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
 
   const sendLight = useCallback(async () => {
     if (!coords) return;
-    if (demoMode) return; // mode démo : pas d'appel réel
     const token = await ensureToken();
     await lightRequest(coords.lat, coords.lng, token);
-  }, [coords, demoMode, ensureToken]);
+  }, [coords, ensureToken]);
 
   const lightUp = useCallback(async () => {
     if (!coords || lighting) return;
@@ -77,11 +75,10 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
     setLighting(true);
     setTimeLeft(total);
 
-    if (!demoMode) {
-      lightInterval.current = setInterval(() => {
-        sendLight().catch(() => {});
-      }, CONFIG.LIGHT_REQUEST_INTERVAL_MS);
-    }
+    // Renvoi périodique de la requête d'allumage (l'éclairage suit l'utilisateur)
+    lightInterval.current = setInterval(() => {
+      sendLight().catch(() => {});
+    }, CONFIG.LIGHT_REQUEST_INTERVAL_MS);
 
     timerInterval.current = setInterval(() => {
       setTimeLeft((t) => {
@@ -94,12 +91,15 @@ export function useJallume({ coords, userId, demoMode }: Params): UseJallume {
         return t - 1;
       });
     }, 1000);
-  }, [coords, lighting, config, demoMode, sendLight]);
+  }, [coords, lighting, config, sendLight]);
 
-  useEffect(() => () => {
-    if (lightInterval.current) clearInterval(lightInterval.current);
-    if (timerInterval.current) clearInterval(timerInterval.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (lightInterval.current) clearInterval(lightInterval.current);
+      if (timerInterval.current) clearInterval(timerInterval.current);
+    },
+    [],
+  );
 
   return { config, status, lighting, timeLeft, error, lightUp };
 }

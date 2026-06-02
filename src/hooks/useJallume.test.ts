@@ -21,25 +21,15 @@ beforeEach(() => {
 describe('useJallume', () => {
   it('charge la config et calcule inActiveZone', async () => {
     const { result } = renderHook(() =>
-      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1', demoMode: true }),
+      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1' }),
     );
     await waitFor(() => expect(result.current.status.kind).toBe('inActiveZone'));
     expect(client.getConfig).toHaveBeenCalled();
   });
 
-  it("en mode démo, lightUp n'appelle PAS l'API réelle mais démarre la minuterie", async () => {
+  it('lightUp appelle authenticate + lightRequest et démarre la minuterie', async () => {
     const { result } = renderHook(() =>
-      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1', demoMode: true }),
-    );
-    await waitFor(() => expect(result.current.status.kind).toBe('inActiveZone'));
-    await act(async () => { await result.current.lightUp(); });
-    expect(client.lightRequest).not.toHaveBeenCalled();
-    expect(result.current.lighting).toBe(true);
-  });
-
-  it('hors mode démo, lightUp appelle authenticate + lightRequest', async () => {
-    const { result } = renderHook(() =>
-      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1', demoMode: false }),
+      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1' }),
     );
     await waitFor(() => expect(result.current.status.kind).toBe('inActiveZone'));
     await act(async () => { await result.current.lightUp(); });
@@ -48,10 +38,10 @@ describe('useJallume', () => {
     expect(result.current.lighting).toBe(true);
   });
 
-  it('hors mode démo, si lightRequest échoue: lighting reste false et error est renseigné', async () => {
+  it('si lightRequest échoue: lighting reste false et error est renseigné', async () => {
     vi.spyOn(client, 'lightRequest').mockRejectedValue(new Error('boom'));
     const { result } = renderHook(() =>
-      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1', demoMode: false }),
+      useJallume({ coords: { lat: 1, lng: 1 }, userId: 'u1' }),
     );
     await waitFor(() => expect(result.current.status.kind).toBe('inActiveZone'));
     await act(async () => { await result.current.lightUp(); });

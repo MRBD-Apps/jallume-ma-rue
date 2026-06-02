@@ -15,6 +15,7 @@ import { Plus, Minus, LocateFixed } from 'lucide-react';
 import { CONFIG } from '../config';
 import type { JallumeConfig, LatLng } from '../api/types';
 import { isZoneActiveNow } from '../geo/schedule';
+import { parseGeoJsonLimites } from '../geo/geojson';
 
 // -------------------------------------------------------------------
 // Types
@@ -24,7 +25,6 @@ interface Props {
   coords: LatLng | null;
   accuracy: number | null;
   config: JallumeConfig | null;
-  dark: boolean;
 }
 
 // -------------------------------------------------------------------
@@ -106,6 +106,15 @@ const INACTIVE_STYLE: PathOptions = {
   dashArray: '5,5',
 };
 
+// Contour de la commune équipée (cf. vrai site : trait doré pointillé)
+const CITY_LIMITS_STYLE: PathOptions = {
+  color: '#FFD700',
+  weight: 2,
+  dashArray: '6,6',
+  fill: false,
+  opacity: 0.9,
+};
+
 // -------------------------------------------------------------------
 // MapScreen
 // -------------------------------------------------------------------
@@ -113,12 +122,15 @@ const INACTIVE_STYLE: PathOptions = {
 const DEFAULT_CENTER: [number, number] = [46.83, 2.4];
 const DEFAULT_ZOOM = 13;
 
-export function MapScreen({ coords, accuracy, config, dark }: Props) {
+export function MapScreen({ coords, accuracy, config }: Props) {
   const center: [number, number] = coords
     ? [coords.lat, coords.lng]
     : DEFAULT_CENTER;
 
-  const tileUrl = dark ? CONFIG.DARK_TILES : CONFIG.LIGHT_TILES;
+  const tileUrl = CONFIG.DARK_TILES;
+
+  // Limites de la commune (contour) — comme sur le vrai site
+  const cityLimits = parseGeoJsonLimites(config?.ville?.geoJsonLimites);
 
   // Precision ring radius: use accuracy (in metres) converted roughly to
   // pixels at zoom 18 — capped to a sensible range.
@@ -145,6 +157,15 @@ export function MapScreen({ coords, accuracy, config, dark }: Props) {
 
         {/* Sync map view whenever coords change */}
         <MapSync coords={coords} />
+
+        {/* Contour de la commune équipée */}
+        {cityLimits.map((ring, idx) => (
+          <Polygon
+            key={`limit-${idx}`}
+            positions={ring.map((p) => [p.lat, p.lng])}
+            pathOptions={CITY_LIMITS_STYLE}
+          />
+        ))}
 
         {/* Zone polygons */}
         {config?.zones?.map((zone, idx) => {

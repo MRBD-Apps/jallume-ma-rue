@@ -1,22 +1,19 @@
 import { useState } from 'react';
 import { DisplayRoot, Button } from 'mrbd-ui-kit';
-import { Lightbulb, Map as MapIcon, Settings as SettingsIcon } from 'lucide-react';
+import { Lightbulb, Map as MapIcon } from 'lucide-react';
 
 import { useUserId } from './hooks/useUserId';
 import { useGeolocation } from './hooks/useGeolocation';
-import { useSettings } from './hooks/useSettings';
 import { useJallume } from './hooks/useJallume';
 
 import { MainScreen } from './screens/MainScreen';
 import { MapScreen } from './screens/MapScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
 
-type Screen = 'main' | 'map' | 'settings';
+type Screen = 'main' | 'map';
 
 const NAV = [
   { id: 'main', label: 'Accueil', icon: Lightbulb },
   { id: 'map', label: 'Carte', icon: MapIcon },
-  { id: 'settings', label: 'Réglages', icon: SettingsIcon },
 ] as const;
 
 function App() {
@@ -24,11 +21,9 @@ function App() {
 
   const userId = useUserId();
   const { coords, accuracy, error: geoError } = useGeolocation();
-  const { demoMode, setDemoMode, dark, setDark } = useSettings();
   const { config, status, lighting, timeLeft, lightUp } = useJallume({
     coords,
     userId,
-    demoMode,
   });
 
   void geoError; // disponible pour un affichage d'erreur futur
@@ -48,23 +43,12 @@ function App() {
                 config={config}
                 lighting={lighting}
                 timeLeft={timeLeft}
-                demoMode={demoMode}
                 onLightUp={lightUp}
               />
             </div>
           )}
           {screen === 'map' && (
-            <MapScreen coords={coords} accuracy={accuracy} config={config} dark={dark} />
-          )}
-          {screen === 'settings' && (
-            <div className="h-full overflow-y-auto">
-              <SettingsScreen
-                demoMode={demoMode}
-                dark={dark}
-                onToggleDemo={() => setDemoMode(!demoMode)}
-                onToggleTheme={() => setDark(!dark)}
-              />
-            </div>
+            <MapScreen coords={coords} accuracy={accuracy} config={config} />
           )}
         </div>
 
