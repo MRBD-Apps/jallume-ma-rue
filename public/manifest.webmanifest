@@ -1,0 +1,16 @@
+{
+  "name": "J'allume ma rue",
+  "short_name": "J'allume",
+  "description": "Allumez l'éclairage public à la demande, mains-libres, depuis vos Meta Ray-Ban Display.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "/favicon.png", "type": "image/png", "sizes": "256x256", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ]
+}
