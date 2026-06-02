@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# J'allume ma rue · Meta Ray-Ban Display
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Allumez l'éclairage public **à la demande**, **mains-libres**, depuis vos **Meta Ray-Ban Display**.
 
-Currently, two official plugins are available:
+Cette application est un client **non officiel** et indépendant du service français
+[« J'allume ma rue »](https://jallume.fr/) (édité par Photon Group). Elle reprend le geste
+essentiel — détecter votre commune, vérifier si vous êtes dans une zone d'éclairage active,
+et déclencher l'allumage qui vous suit dans vos déplacements — dans une interface pensée pour
+l'écran 600×600 et la navigation spatiale des lunettes.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> ⚠️ Le bouton d'allumage déclenche l'**éclairage public réel** via l'API publique de
+> jallume.fr, et uniquement dans les communes équipées et pendant les plages horaires
+> définies par chaque zone. Projet communautaire, **non affilié** à Photon Group / « J'allume ma rue ».
 
-## React Compiler
+## 📲 Installer sur les lunettes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Ouvrez ce lien pour ajouter l'app à vos Meta Ray-Ban Display :
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+fb-viewapp://web_app_deep_link?appName=J%27allume%20ma%20rue&appUrl=https%3A%2F%2Fjallume-rbmd.vercel.app%2F
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Ou directement dans le navigateur des lunettes : **https://jallume-rbmd.vercel.app**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ✨ Fonctionnalités
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Détection automatique** de la commune et des zones d'éclairage (API jallume.fr).
+- **Ampoule** centrale : un appui authentifie et envoie la requête d'allumage, renvoyée
+  toutes les 5 s pour que la lumière vous suive (comme le service officiel).
+- **Statuts clairs** : position non détectée, ville non équipée, hors zone, hors horaire, prêt.
+- **Carte** façon HUD : tuiles sombres, **zones compatibles** (actives/inactives selon les
+  horaires) et **contour de la commune**, contrôles zoom/recentrage pilotables au D-pad.
+- 100 % **navigation spatiale** (flèches / temple tactile + Entrée), aucune interaction souris requise.
+
+## 🛠️ Stack technique
+
+- [React 19](https://react.dev/) + [Vite](https://vite.dev/) + TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- [`mrbd-ui-kit`](https://github.com/michaelcummings12/mrbd-ui-kit) — composants & moteur de
+  focus dédiés au Meta Ray-Ban Display (`DisplayRoot`, `Button`, `Text`, `Card`, `Focusable`)
+- [Leaflet](https://leafletjs.com/) / [react-leaflet](https://react-leaflet.js.org/) + tuiles CartoDB
+- [Vitest](https://vitest.dev/) + Testing Library
+
+## 🚀 Développement
+
+```bash
+npm install
+npm run dev        # serveur de dev (http://localhost:5173)
+npm run test       # tests unitaires (Vitest)
+npm run build      # build de production (dist/)
 ```
+
+> La géolocalisation nécessite un contexte **HTTPS** (ou localhost). Pour tester une commune
+> équipée, vous pouvez simuler une position dans les DevTools du navigateur
+> (ex. Cergy : `49.0364, 2.0582`).
+
+## 🔍 Comment ça marche
+
+1. `navigator.geolocation.watchPosition` fournit la position.
+2. `GET https://api.jallume.fr/App/Config/{lat}&{lng}` renvoie la commune, les zones
+   (polygones + horaires) et la minuterie.
+3. Le statut est calculé côté client (point-in-polygon + plage horaire, gestion du passage de minuit).
+4. En zone active, l'appui sur l'ampoule : `POST /Auth/JallumeToken` (JWT anonyme) puis
+   `POST /App/lightRequest` (immédiat, répété toutes les 5 s) — l'éclairage suit l'utilisateur.
+
+Aucun compte n'est requis : l'identité est un identifiant anonyme stocké localement.
+
+## 🙏 Crédits
+
+- Service & API : [J'allume ma rue](https://jallume.fr/) (Photon Group)
+- UI kit : [`mrbd-ui-kit`](https://github.com/michaelcummings12/mrbd-ui-kit) de Michael Cummings
+- Inspiration carte glasses : [Herald](https://herald.ascents.gg/)
+
+## 📄 Licence
+
+[MIT](./LICENSE)
