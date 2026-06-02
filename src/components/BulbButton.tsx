@@ -1,4 +1,5 @@
 import { Focusable, Text } from 'mrbd-ui-kit';
+import { Lightbulb } from 'lucide-react';
 
 interface Props {
   active: boolean;
@@ -30,17 +31,20 @@ export function BulbButton({ active, disabled, timeLeft, onActivate }: Props) {
         disabled={disabled}
         onClick={disabled ? undefined : onActivate}
         className={[
-          'flex h-40 w-40 flex-col items-center justify-center rounded-full transition-all',
+          'flex h-40 w-40 flex-col items-center justify-center gap-1 rounded-full border transition-all',
           'outline-none focus-visible:outline-none',
           active
-            ? 'bg-mrbd-accent/90 text-black shadow-mrbd-glow'
-            : 'bg-mrbd-accent/10 text-mrbd-accent',
+            ? 'border-mrbd-accent bg-mrbd-accent/90 text-black shadow-mrbd-glow'
+            : 'border-mrbd-accent/40 bg-mrbd-accent/10 text-mrbd-accent',
           disabled ? 'opacity-40' : 'hover:bg-mrbd-accent/20',
         ].join(' ')}
       >
-        <span className="text-5xl leading-none">💡</span>
+        <Lightbulb
+          className={active ? 'size-16 fill-current' : 'size-16'}
+          strokeWidth={1.5}
+        />
         {active && (
-          <Text weight="bold" className="mt-1 block">
+          <Text weight="bold" className="block">
             {fmt(timeLeft)}
           </Text>
         )}

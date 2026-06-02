@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DisplayRoot, Button } from 'mrbd-ui-kit';
+import { DisplayRoot, Focusable } from 'mrbd-ui-kit';
 import { Lightbulb, Map as MapIcon, Settings as SettingsIcon } from 'lucide-react';
 
 import { useUserId } from './hooks/useUserId';
@@ -68,20 +68,35 @@ function App() {
           )}
         </div>
 
-        {/* Barre de navigation (composants du kit) */}
-        <nav className="flex shrink-0 items-center justify-around gap-2 border-t border-white/10 px-2 py-2">
-          {NAV.map((item) => (
-            <Button
-              key={item.id}
-              id={`nav-${item.id}`}
-              icon={item.icon}
-              variant={screen === item.id ? 'secondary' : 'ghost'}
-              autoFocus={false}
-              onClick={() => setScreen(item.id)}
-            >
-              {item.label}
-            </Button>
-          ))}
+        {/* Dock de navigation — boutons ronds icône-seule (cf. Herald) */}
+        <nav className="flex shrink-0 items-center justify-center gap-2 py-3">
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            const isActive = screen === item.id;
+            return (
+              <Focusable
+                key={item.id}
+                id={`nav-${item.id}`}
+                autoFocus={false}
+                className="rounded-full"
+              >
+                <button
+                  type="button"
+                  aria-label={item.label}
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => setScreen(item.id)}
+                  className={[
+                    'flex h-14 w-14 items-center justify-center rounded-full border outline-none transition-colors',
+                    isActive
+                      ? 'border-mrbd-accent bg-mrbd-accent/20 text-mrbd-accent'
+                      : 'border-white/10 bg-white/5 text-mrbd-text hover:bg-white/10',
+                  ].join(' ')}
+                >
+                  <Icon className="size-7" strokeWidth={2} />
+                </button>
+              </Focusable>
+            );
+          })}
         </nav>
       </div>
     </DisplayRoot>
