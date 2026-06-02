@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DisplayRoot, Focusable } from 'mrbd-ui-kit';
+import { DisplayRoot, Button } from 'mrbd-ui-kit';
 import { Lightbulb, Map as MapIcon, Settings as SettingsIcon } from 'lucide-react';
 
 import { useUserId } from './hooks/useUserId';
@@ -68,35 +68,22 @@ function App() {
           )}
         </div>
 
-        {/* Dock de navigation — boutons ronds icône-seule (cf. Herald) */}
+        {/* Dock de navigation — Button du kit, en cercles icône-seule (cf. Herald) */}
         <nav className="flex shrink-0 items-center justify-center gap-2 py-3">
-          {NAV.map((item) => {
-            const Icon = item.icon;
-            const isActive = screen === item.id;
-            return (
-              <Focusable
-                key={item.id}
-                id={`nav-${item.id}`}
-                autoFocus={false}
-                className="rounded-full"
-              >
-                <button
-                  type="button"
-                  aria-label={item.label}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => setScreen(item.id)}
-                  className={[
-                    'flex h-14 w-14 items-center justify-center rounded-full border outline-none transition-colors',
-                    isActive
-                      ? 'border-mrbd-accent bg-mrbd-accent/20 text-mrbd-accent'
-                      : 'border-white/10 bg-white/5 text-mrbd-text hover:bg-white/10',
-                  ].join(' ')}
-                >
-                  <Icon className="size-7" strokeWidth={2} />
-                </button>
-              </Focusable>
-            );
-          })}
+          {NAV.map((item) => (
+            <Button
+              key={item.id}
+              id={`nav-${item.id}`}
+              variant={screen === item.id ? 'secondary' : 'ghost'}
+              size="lg"
+              icon={item.icon}
+              autoFocus={false}
+              onClick={() => setScreen(item.id)}
+              className="h-14 w-14 rounded-full p-0"
+            >
+              <span className="sr-only">{item.label}</span>
+            </Button>
+          ))}
         </nav>
       </div>
     </DisplayRoot>
